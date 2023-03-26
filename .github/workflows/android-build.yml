@@ -55,4 +55,4 @@ jobs:
             const insertIndex = readme.indexOf('## ');
             const updatedReadme = readme.substring(0, insertIndex) + '\n\n' + contents + '\n\n' + readme.substring(insertIndex);
             fs.writeFileSync(readmePath, updatedReadme);
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
