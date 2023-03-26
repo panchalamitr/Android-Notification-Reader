@@ -41,5 +41,5 @@ jobs:
           path: app/build/outputs/apk/debug
 
       - name: Generate APK download link
-        run: echo "Download APK [here](https://github.com/panchalamitr/Android-Notification-Reader/releases/download/latest/app-debug.apk)" > apk-link.txt
+        run: echo "Download APK [here](https://github.com/${{ github.repository }}/releases/download/latest/my-app-debug)" > apk-link.txt
 
