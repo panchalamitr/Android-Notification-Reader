@@ -50,7 +50,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const contents = fs.readFileSync(path.join(process.env.GITHUB_WORKSPACE, 'apk-link.txt'), 'utf8').trim();
-            const readmePath = path.join(process.env.GITHUB_WORKSPACE, 'README.md');
+            const readmePath = path.join(process.env.GITHUB_WORKSPACE, 'Android-Notification-Reader', 'README.md');
             let readme = fs.readFileSync(readmePath, 'utf8');
             const insertIndex = readme.indexOf('## ');
             const updatedReadme = readme.substring(0, insertIndex) + '\n\n' + contents + '\n\n' + readme.substring(insertIndex);
