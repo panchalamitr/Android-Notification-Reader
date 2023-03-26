@@ -10,8 +10,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.firestore.FirebaseFirestore
 import com.panchalamitr.notificationreader.adapter.NotificationAdapter
 import com.panchalamitr.notificationreader.databinding.ActivityMainBinding
+import com.panchalamitr.notificationreader.model.NotificationEntity
 import com.panchalamitr.notificationreader.service.NotificationListener
 import com.panchalamitr.notificationreader.viewmodel.NotificationViewModel
 
@@ -25,8 +27,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+    setContentView(binding.root)
+        insertIntoFirebaseStorage()
         val intent = Intent(this, NotificationListener::class.java)
         startService(intent)
     }
@@ -50,6 +52,20 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+     /** Below function will store data in firebase storage **/
+    private fun insertIntoFirebaseStorage() {
+         val firestore = FirebaseFirestore.getInstance()
+         val collectionRef = firestore.collection("notifications")
+         val notification = NotificationEntity(
+             packageName = "com.example.app",
+             title = "New Notification",
+             message = "Hello World",
+             timestamp = System.currentTimeMillis(),
+             appName = "My App"
+         )
+         collectionRef.document().set(notification)
+     }
 
     override fun onResume() {
         super.onResume()
@@ -78,19 +94,17 @@ class MainActivity : AppCompatActivity() {
         val packageName = packageName
         val flat: String =
             Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
-        if (flat != null) {
-            val policies = flat.split(":")
-                .toTypedArray()
-            for (i in policies.indices) {
-                val componentName = ComponentName.unflattenFromString(policies[i])
-                Log.d(TAG, "isNotificationAccessPermissionGranted: " + componentName?.packageName)
-                if (componentName != null && TextUtils.equals(
-                        packageName,
-                        componentName.packageName
-                    )
-                ) {
-                    return true
-                }
+        val policies = flat.split(":")
+            .toTypedArray()
+        for (i in policies.indices) {
+            val componentName = ComponentName.unflattenFromString(policies[i])
+            Log.d(TAG, "isNotificationAccessPermissionGranted: " + componentName?.packageName)
+            if (componentName != null && TextUtils.equals(
+                    packageName,
+                    componentName.packageName
+                )
+            ) {
+                return true
             }
         }
         return false
