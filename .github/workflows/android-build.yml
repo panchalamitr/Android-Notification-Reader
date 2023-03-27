@@ -1,48 +1,85 @@
-name: Android Build
+name: Android CI
+
+env:
+  # The name of the main module repository
+  main_project_module: app
+
+  # The name of the Play Store
+  playstore_name: Frogobox ID
 
 on:
+  # Triggers the workflow on push or pull request events but only for default and protected branches
   push:
-    branches:
-      - main
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
+      # Set Current Date As Env Variable
+      - name: Set current date as env variable
+        run: echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      # Set Repository Name As Env Variable
+      - name: Set repository name as env variable
+        run: echo "repository_name=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v1
         with:
-          java-version: "11"
-          distribution: "adopt"
+          java-version: 11
 
-      - name: Grant execute permission for Gradle wrapper
+      - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Build APK
+      # Run Tests Build
+      - name: Run gradle tests
+        run: ./gradlew test
+
+      # Run Build Project
+      - name: Build gradle project
+        run: ./gradlew build
+
+      # Create APK Debug
+      - name: Build apk debug project (APK) - ${{ env.main_project_module }} module
         run: ./gradlew assembleDebug
 
-      - name: Upload APK artifact
+      # Create APK Release
+      - name: Build apk release project (APK) - ${{ env.main_project_module }} module
+        run: ./gradlew assemble
+
+      # Create Bundle AAB Release
+      # Noted for main module build [main_project_module]:bundleRelease
+      - name: Build app bundle release (AAB) - ${{ env.main_project_module }} module
+        run: ./gradlew ${{ env.main_project_module }}:bundleRelease
+
+      # Upload Artifact Build
+      # Noted For Output [main_project_module]/build/outputs/apk/debug/
+      - name: Upload APK Debug - ${{ env.repository_name }}
         uses: actions/upload-artifact@v2
         with:
-          name: my-app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) debug generated
+          path: ${{ env.main_project_module }}/build/outputs/apk/debug/
 
-  update-readme:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v2.1.1
+      # Noted For Output [main_project_module]/build/outputs/apk/release/
+      - name: Upload APK Release - ${{ env.repository_name }}
+        uses: actions/upload-artifact@v2
         with:
-          # Artifact name
-          name: my-app-debug
-          # Destination path
-          path: app/build/outputs/apk/debug/app-debug.apk
-          
-      - name: Update ReadMe file with APK URL
-        run: |
-          echo "Download the latest APK here: https://github.com/panchalamitr/Android-Notification-Reader/raw/main/app/build/outputs/apk/debug/app-debug.apk" >> README.md
-        if: always()
+          name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - APK(s) release generated
+          path: ${{ env.main_project_module }}/build/outputs/apk/release/
+
+      # Noted For Output [main_project_module]/build/outputs/bundle/release/
+      - name: Upload AAB (App Bundle) Release - ${{ env.repository_name }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.date_today }} - ${{ env.playstore_name }} - ${{ env.repository_name }} - App bundle(s) AAB release generated
+          path: ${{ env.main_project_module }}/build/outputs/bundle/release/
