@@ -40,19 +40,10 @@ jobs:
           name: my-app-debug
           path: app/build/outputs/apk/debug
 
-      - name: Generate APK download link
-        run: echo "Download APK [here](https://github.com/panchalamitr/Android-Notification-Reader/releases/download/latest/app-debug.apk)" > apk-link.txt
-
-      - name: Update ReadMe
-        uses: actions/github-script@v4
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2.1.1
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const contents = fs.readFileSync(path.join(process.env.GITHUB_WORKSPACE, 'apk-link.txt'), 'utf8').trim();
-            const readmePath = path.join(process.env.GITHUB_WORKSPACE, 'Android-Notification-Reader', 'README.md');
-            let readme = fs.readFileSync(readmePath, 'utf8');
-            const insertIndex = readme.indexOf('## ');
-            const updatedReadme = readme.substring(0, insertIndex) + '\n\n' + contents + '\n\n' + readme.substring(insertIndex);
-            fs.writeFileSync(readmePath, updatedReadme);
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Artifact name
+          name: my-app-debug
+          # Destination path
+          path: app/build/outputs/apk/debug/app-debug.apk
