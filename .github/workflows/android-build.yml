@@ -39,6 +39,9 @@ jobs:
         with:
           name: my-app-debug
           path: app/build/outputs/apk/debug
-
-      - name: Generate APK download link
-        run: echo "Download APK [here](https://github.com/panchalamitr/Android-Notification-Reader/releases/download/latest/app-debug.apk)" > apk-link.txt
+      - name: Releasing using Hub
+        uses: panchalamitr/action-release-debugapk@master
+        env:
+         GITHUB_TOKEN: ${{ secrets.TOKEN }}
+         APP_FOLDER: app
+         RELEASE_TITLE: New Build
