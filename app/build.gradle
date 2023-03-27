@@ -21,7 +21,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    task generateVersionTxt {
+        doLast {
+            file("./version.txt").text = android.defaultConfig.versionName
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
