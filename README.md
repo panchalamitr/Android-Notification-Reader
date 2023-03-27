@@ -1,4 +1,4 @@
-# Android Notification Reader App
+# Android Notification Reader
 
 This is an Android app that can listen to all apps' notifications and store them in a local Room database. The app can also display all the stored notifications in a RecyclerView.
 
